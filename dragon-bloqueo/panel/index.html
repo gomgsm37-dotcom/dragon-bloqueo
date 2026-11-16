@@ -536,7 +536,6 @@ function bindInstalar(){
       'android.app.extra.PROVISIONING_DEVICE_ADMIN_PACKAGE_DOWNLOAD_LOCATION': apkUrl(),
       'android.app.extra.PROVISIONING_DEVICE_ADMIN_SIGNATURE_CHECKSUM': APP_CHECKSUM,
       'android.app.extra.PROVISIONING_LEAVE_ALL_SYSTEM_APPS_ENABLED': true,
-      'android.app.extra.PROVISIONING_SKIP_ENCRYPTION': true,
       'android.app.extra.PROVISIONING_ADMIN_EXTRAS_BUNDLE': {server: CFG.dbUrl, nombre: l.nombre, tel: l.tel || '', frp: CONF.frp || ''}
     };
     const ssid = $('#i_ssid').value.trim();
