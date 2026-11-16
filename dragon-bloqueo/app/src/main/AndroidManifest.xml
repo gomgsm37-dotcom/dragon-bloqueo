@@ -9,7 +9,6 @@
     <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
     <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES" />
 
-    <!-- Para que funcione también en Android TV -->
     <uses-feature android:name="android.hardware.touchscreen" android:required="false" />
     <uses-feature android:name="android.hardware.telephony" android:required="false" />
     <uses-feature android:name="android.software.leanback" android:required="false" />
@@ -35,11 +34,9 @@
             </intent-filter>
         </receiver>
 
-        <!-- Requeridas por Android 12+ para instalar con QR -->
         <activity
             android:name=".GetProvisioningModeActivity"
-            android:exported="true"
-            android:permission="android.permission.BIND_DEVICE_ADMIN">
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.app.action.GET_PROVISIONING_MODE" />
                 <category android:name="android.intent.category.DEFAULT" />
@@ -48,8 +45,7 @@
 
         <activity
             android:name=".PolicyComplianceActivity"
-            android:exported="true"
-            android:permission="android.permission.BIND_DEVICE_ADMIN">
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.app.action.ADMIN_POLICY_COMPLIANCE" />
                 <category android:name="android.intent.category.DEFAULT" />
@@ -75,7 +71,6 @@
             android:showWhenLocked="true"
             android:turnScreenOn="true" />
 
-        <!-- Pantalla de inicio que se activa solo mientras el equipo está bloqueado -->
         <activity-alias
             android:name=".LockHome"
             android:enabled="false"
