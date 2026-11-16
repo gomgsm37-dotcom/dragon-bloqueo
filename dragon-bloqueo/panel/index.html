@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#B71C1C">
+<title>Dragon G.S.M – Ventas en cuotas y bloqueo</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+  :root{--rojo:#B71C1C;--rojo2:#8E1414;--fondo:#F4F5F7;--card:#fff;--txt:#1C1F23;--gris:#6B7178;--borde:#E2E4E8;
+    --verde:#2E7D32;--amarillo:#B26A00;--azul:#1565C0;--naranja:#E65100}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--fondo);color:var(--txt);font-size:15px}
+  header{background:var(--rojo);color:#fff;padding:12px 16px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:5}
+  header h1{font-size:17px;margin:0;flex:1}
+  header small{opacity:.8}
+  nav{display:flex;background:#fff;border-bottom:1px solid var(--borde);position:sticky;top:48px;z-index:4}
+  nav button{flex:1;border:0;background:none;padding:12px 4px;font-size:14px;color:var(--gris);border-bottom:3px solid transparent;cursor:pointer}
+  nav button.on{color:var(--rojo);border-bottom-color:var(--rojo);font-weight:600}
+  main{max-width:900px;margin:0 auto;padding:14px}
+  .card{background:var(--card);border:1px solid var(--borde);border-radius:12px;padding:14px;margin-bottom:12px}
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px}
+  .stat{background:#fff;border:1px solid var(--borde);border-radius:10px;padding:10px;text-align:center}
+  .stat b{display:block;font-size:20px}
+  .stat span{font-size:12px;color:var(--gris)}
+  @media(max-width:560px){.stats{grid-template-columns:repeat(2,1fr)}}
+  label{display:block;font-size:13px;color:var(--gris);margin:10px 0 4px}
+  input,select,textarea{width:100%;padding:10px;border:1px solid var(--borde);border-radius:8px;font-size:15px;background:#fff;font-family:inherit}
+  textarea{min-height:70px}
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  @media(max-width:560px){.row{grid-template-columns:1fr}}
+  .btn{display:inline-block;border:0;border-radius:8px;padding:10px 14px;font-size:15px;cursor:pointer;background:var(--rojo);color:#fff;text-decoration:none;text-align:center}
+  .btn.sec{background:#fff;color:var(--txt);border:1px solid var(--borde)}
+  .btn.verde{background:var(--verde)} .btn.azul{background:var(--azul)} .btn.naranja{background:var(--naranja)} .btn.gris{background:#5f6368}
+  .btn.full{width:100%;margin-top:14px}
+  .btns{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+  .btns .btn{flex:1 1 140px}
+  .chips{display:flex;gap:6px;overflow-x:auto;margin:10px 0}
+  .chip{border:1px solid var(--borde);background:#fff;border-radius:20px;padding:6px 12px;font-size:13px;white-space:nowrap;cursor:pointer}
+  .chip.on{background:var(--rojo);color:#fff;border-color:var(--rojo)}
+  .venta{cursor:pointer;display:flex;gap:12px;align-items:flex-start}
+  .venta .main{flex:1;min-width:0}
+  .venta h3{margin:0 0 2px;font-size:16px}
+  .muted{color:var(--gris);font-size:13px}
+  .tag{display:inline-block;padding:3px 9px;border-radius:12px;font-size:12px;font-weight:600;white-space:nowrap}
+  .t-ok{background:#E8F5E9;color:var(--verde)} .t-pronto{background:#FFF8E1;color:var(--amarillo)}
+  .t-venc{background:#FFF3E0;color:var(--naranja)} .t-bloq{background:#FFEBEE;color:var(--rojo)}
+  .t-pag{background:#E3F2FD;color:var(--azul)} .t-lib{background:#ECEFF1;color:#455A64}
+  .bar{height:6px;background:#EEE;border-radius:4px;margin-top:8px;overflow:hidden}
+  .bar i{display:block;height:100%;background:var(--verde)}
+  .modal{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:flex-end;justify-content:center;z-index:20}
+  .modal.on{display:flex}
+  .sheet{background:#fff;width:100%;max-width:640px;max-height:92vh;overflow:auto;border-radius:16px 16px 0 0;padding:18px}
+  @media(min-width:700px){.modal{align-items:center}.sheet{border-radius:16px}}
+  .sheet h2{margin:0 0 6px;font-size:19px}
+  .kv{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;font-size:14px;margin-top:10px}
+  .kv span:nth-child(odd){color:var(--gris)}
+  table{width:100%;border-collapse:collapse;font-size:14px;margin-top:8px}
+  td,th{padding:6px 4px;border-bottom:1px solid var(--borde);text-align:left}
+  .center{text-align:center}
+  #qr{display:flex;justify-content:center;padding:14px;background:#fff}
+  .aviso{background:#FFF8E1;border:1px solid #FFE082;border-radius:8px;padding:10px;font-size:13px;margin-top:10px}
+  .err{color:var(--rojo);font-size:14px;margin-top:8px}
+  .toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:#323232;color:#fff;padding:10px 16px;border-radius:8px;font-size:14px;display:none;z-index:30}
+  ol{padding-left:20px} ol li{margin:6px 0}
+  pre{background:#F1F3F4;padding:10px;border-radius:8px;font-size:12px;overflow:auto}
+  .hidden{display:none}
+</style>
+</head>
+<body>
+<header><h1>🐉 Dragon G.S.M <small>· Cuotas y bloqueo</small></h1><span id="userTag" style="font-size:12px;opacity:.85"></span></header>
+<nav id="nav" class="hidden">
+  <button data-v="ventas" class="on">Ventas</button>
+  <button data-v="nueva">Nueva venta</button>
+  <button data-v="instalar">Instalar</button>
+  <button data-v="ajustes">Ajustes</button>
+</nav>
+<main id="app"></main>
+
+<div class="modal" id="modal"><div class="sheet" id="sheet"></div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+// ===== Datos fijos de la app Android =====
+const APP_COMPONENT = 'com.dragongsm.bloqueo/.AdminReceiver';
+const APP_CHECKSUM = 'GJ10zfuMxu8tzxnwtf6zNZVx-g1VBZe8I7v5cH38br4';
+const APK_NAME = 'dragon-bloqueo.apk';
+const DIA = 86400000;
+
+const RULES = `{
+  "rules": {
+    "estado": {
+      ".read": "auth != null",
+      ".write": "auth != null",
+      "$imei": { ".read": true }
+    },
+    "reportes": {
+      ".read": "auth != null",
+      "$imei": { ".write": true }
+    },
+    "ventas": { ".read": "auth != null", ".write": "auth != null" },
+    "config": { ".read": "auth != null", ".write": "auth != null" }
+  }
+}`;
+
+const DEF_CONFIG = {
+  locales: [
+    {nombre: 'Dragon G.S.M', tel: '381 340 6049'},
+    {nombre: 'Lorena Mengacini', tel: '381 401-9628'},
+    {nombre: 'Chicho Cell', tel: ''}
+  ],
+  mensaje: 'Tu cuota está vencida. Acercate al local o comunicate para regularizar el pago y desbloquear tu equipo.',
+  gracia: 2,
+  diasSinConexion: 0,
+  frp: 'gomgsm37@gmail.com'
+};
+
+// ===== Estado =====
+let CFG = load('dbl_cfg') || null;      // {apiKey, dbUrl}
+let AUTH = load('dbl_auth') || null;    // {idToken, refreshToken, exp, email}
+let VENTAS = {}, REPORTES = {}, CONF = JSON.parse(JSON.stringify(DEF_CONFIG));
+let vista = 'ventas', filtro = 'todas', busqueda = '';
+
+function load(k){ try{ return JSON.parse(localStorage.getItem(k)); }catch(e){ return null; } }
+function save(k,v){ try{ if(v===null) localStorage.removeItem(k); else localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const money = n => '$ ' + Math.round(Number(n)||0).toLocaleString('es-AR');
+const fmtD = t => t ? new Date(t).toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',year:'numeric'}) : '—';
+const fmtDT = t => t ? new Date(t).toLocaleString('es-AR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}) : 'nunca';
+const isoL = d => d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+const hoyStr = () => isoL(new Date());
+const parseD = s => { if(!s) return null; const [y,m,d]=s.split('-').map(Number); return new Date(y,m-1,d); };
+const finDia = d => { const x=new Date(d); x.setHours(23,59,59,0); return x.getTime(); };
+function toast(m){ const t=$('#toast'); t.textContent=m; t.style.display='block'; clearTimeout(t._h); t._h=setTimeout(()=>t.style.display='none',2600); }
+
+// ===== Firebase (REST) =====
+async function token(){
+  if(!AUTH) throw new Error('login');
+  if(Date.now() > AUTH.exp - 60000){
+    const r = await fetch('https://securetoken.googleapis.com/v1/token?key='+CFG.apiKey,{
+      method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},
+      body:'grant_type=refresh_token&refresh_token='+encodeURIComponent(AUTH.refreshToken)});
+    const j = await r.json();
+    if(!r.ok){ logout(); throw new Error('login'); }
+    AUTH = {...AUTH, idToken:j.id_token, refreshToken:j.refresh_token, exp:Date.now()+Number(j.expires_in)*1000};
+    save('dbl_auth', AUTH);
+  }
+  return AUTH.idToken;
+}
+async function db(path, method='GET', body){
+  const t = await token();
+  const opt = {method, headers:{}};
+  if(body !== undefined){ opt.body = JSON.stringify(body); opt.headers['Content-Type']='application/json'; }
+  const r = await fetch(`${CFG.dbUrl}/${path}.json?auth=${encodeURIComponent(t)}`, opt);
+  if(!r.ok){ const tx = await r.text(); throw new Error('Firebase '+r.status+': '+tx.slice(0,150)); }
+  return r.json();
+}
+async function login(email, pass){
+  const r = await fetch('https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key='+CFG.apiKey,{
+    method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({email, password:pass, returnSecureToken:true})});
+  const j = await r.json();
+  if(!r.ok) throw new Error(j.error && j.error.message === 'INVALID_LOGIN_CREDENTIALS' ? 'Email o contraseña incorrectos' : (j.error?.message || 'No se pudo entrar'));
+  AUTH = {idToken:j.idToken, refreshToken:j.refreshToken, exp:Date.now()+Number(j.expiresIn)*1000, email:j.email};
+  save('dbl_auth', AUTH);
+}
+function logout(){ AUTH=null; save('dbl_auth', null); render(); }
+
+async function cargar(){
+  const [v, r, c] = await Promise.all([db('ventas'), db('reportes'), db('config')]);
+  VENTAS = v || {}; REPORTES = r || {};
+  CONF = Object.assign(JSON.parse(JSON.stringify(DEF_CONFIG)), c || {});
+}
+
+// ===== Cálculo de cuotas =====
+function sumarPeriodo(fecha, n, freq){
+  const d = new Date(fecha);
+  if(freq==='semanal') d.setDate(d.getDate()+7*n);
+  else if(freq==='quincenal') d.setDate(d.getDate()+15*n);
+  else { const dia=d.getDate(); d.setDate(1); d.setMonth(d.getMonth()+n); const ult=new Date(d.getFullYear(),d.getMonth()+1,0).getDate(); d.setDate(Math.min(dia,ult)); }
+  return d;
+}
+function calc(v){
+  const pagos = Object.values(v.pagos||{}).reduce((a,p)=>a+(Number(p.monto)||0),0);
+  const cuotas = Number(v.cuotas)||0, mc = Number(v.montoCuota)||0;
+  const totalCuotas = cuotas*mc;
+  const pagadas = mc>0 ? Math.min(cuotas, Math.floor((pagos+0.01)/mc)) : 0;
+  const saldo = Math.max(0, totalCuotas - pagos);
+  const completo = cuotas>0 && saldo <= 0.01;
+  const prox = completo ? null : sumarPeriodo(parseD(v.primerVenc), pagadas, v.frecuencia);
+  const gracia = Number(v.gracia ?? CONF.gracia) || 0;
+  let vence = prox ? finDia(prox) + gracia*DIA : 0;
+  if(vence && v.prorroga){ const p = finDia(parseD(v.prorroga)); if(p > vence) vence = p; }
+  const now = Date.now();
+  let est, cls;
+  if(v.liberado){ est='Liberado'; cls='t-lib'; }
+  else if(v.bloqueado){ est='Bloqueado'; cls='t-bloq'; }
+  else if(completo){ est='Pagado – liberar'; cls='t-pag'; }
+  else if(now > vence){ est='Bloqueado (vencida)'; cls='t-bloq'; }
+  else if(now > finDia(prox)){ est='Vencida – en gracia'; cls='t-venc'; }
+  else if(finDia(prox) - now < 3*DIA){ est='Vence pronto'; cls='t-pronto'; }
+  else { est='Al día'; cls='t-ok'; }
+  const bloqueadoAhora = !v.liberado && (v.bloqueado || (vence && now > vence));
+  return {pagos, pagadas, cuotas, saldo, completo, prox, vence, est, cls, totalCuotas, bloqueadoAhora};
+}
+function local(v){ return CONF.locales[Number(v.local)||0] || CONF.locales[0]; }
+
+/** Publica para el celular lo que tiene que hacer. */
+async function publicarEstado(v){
+  const c = calc(v), l = local(v);
+  const e = {
+    bloqueado: !!v.bloqueado,
+    vence: v.liberado ? 0 : c.vence,
+    liberar: !!v.liberado,
+    mensaje: v.mensaje || CONF.mensaje,
+    telefono: l.tel || '',
+    negocio: l.nombre || 'Dragon G.S.M',
+    diasSinConexion: Number(CONF.diasSinConexion)||0,
+    frp: v.liberado ? '' : (CONF.frp || ''),
+    actualizado: {'.sv':'timestamp'}
+  };
+  for(const im of [v.imei, v.imei2]) if(im) await db('estado/'+im, 'PUT', e);
+}
+
+// ===== Pantallas =====
+function render(){
+  const app = $('#app');
+  $('#userTag').textContent = AUTH ? AUTH.email : '';
+  if(!CFG){ $('#nav').classList.add('hidden'); app.innerHTML = vistaSetup(); bindSetup(); return; }
+  if(!AUTH){ $('#nav').classList.add('hidden'); app.innerHTML = vistaLogin(); bindLogin(); return; }
+  $('#nav').classList.remove('hidden');
+  document.querySelectorAll('#nav button').forEach(b=>b.classList.toggle('on', b.dataset.v===vista));
+  if(vista==='ventas'){ app.innerHTML = vistaVentas(); bindVentas(); }
+  else if(vista==='nueva'){ app.innerHTML = vistaForm(null); bindForm(null); }
+  else if(vista==='instalar'){ app.innerHTML = vistaInstalar(); bindInstalar(); }
+  else if(vista==='ajustes'){ app.innerHTML = vistaAjustes(); bindAjustes(); }
+}
+
+function vistaSetup(){
+  return `<div class="card"><h2 style="margin-top:0">Configuración inicial</h2>
+  <p class="muted">Esto se hace una sola vez en cada computadora o celular. Los datos salen de tu proyecto de Firebase (ver la guía).</p>
+  <label>Clave de API web (Web API Key)</label><input id="s_key" placeholder="AIza...">
+  <label>Dirección de Realtime Database</label><input id="s_url" placeholder="https://tu-proyecto-default-rtdb.firebaseio.com">
+  <div id="s_err" class="err"></div>
+  <button class="btn full" id="s_ok">Guardar</button></div>`;
+}
+function bindSetup(){
+  $('#s_ok').onclick = ()=>{
+    const apiKey=$('#s_key').value.trim(); let dbUrl=$('#s_url').value.trim().replace(/\/+$/,'');
+    if(!apiKey.startsWith('AIza')) return $('#s_err').textContent='La clave de API empieza con "AIza".';
+    if(!/^https:\/\/.+(firebaseio\.com|firebasedatabase\.app)$/.test(dbUrl)) return $('#s_err').textContent='La dirección tiene que ser la de Realtime Database (termina en firebaseio.com o firebasedatabase.app).';
+    CFG={apiKey,dbUrl}; save('dbl_cfg',CFG); render();
+  };
+}
+
+function vistaLogin(){
+  return `<div class="card" style="max-width:420px;margin:30px auto"><h2 style="margin-top:0">Entrar</h2>
+  <label>Email</label><input id="l_email" type="email" autocomplete="username">
+  <label>Contraseña</label><input id="l_pass" type="password" autocomplete="current-password">
+  <div id="l_err" class="err"></div>
+  <button class="btn full" id="l_ok">Entrar</button>
+  <p class="muted center" style="margin-top:14px"><a href="#" id="l_reset">Cambiar datos de Firebase</a></p></div>`;
+}
+function bindLogin(){
+  const go = async ()=>{
+    $('#l_err').textContent=''; $('#l_ok').disabled=true;
+    try{ await login($('#l_email').value.trim(), $('#l_pass').value); await refrescar(); }
+    catch(e){ if($('#l_err')) $('#l_err').textContent=e.message; }
+    if($('#l_ok')) $('#l_ok').disabled=false;
+  };
+  $('#l_ok').onclick=go; $('#l_pass').onkeydown=e=>{ if(e.key==='Enter') go(); };
+  $('#l_reset').onclick=e=>{ e.preventDefault(); CFG=null; save('dbl_cfg',null); render(); };
+}
+
+function listaOrdenada(){
+  return Object.entries(VENTAS).map(([id,v])=>({id,v,c:calc(v)}))
+    .sort((a,b)=>{
+      const pr = x => x.v.liberado?5 : x.c.completo?4 : x.c.bloqueadoAhora?0 : (Date.now()>finDia(x.c.prox)?1:2);
+      return pr(a)-pr(b) || ((a.c.prox?.getTime()||0)-(b.c.prox?.getTime()||0));
+    });
+}
+function vistaVentas(){
+  const all = listaOrdenada();
+  const activas = all.filter(x=>!x.v.liberado && !x.c.completo);
+  const venc = activas.filter(x=>x.c.prox && Date.now()>finDia(x.c.prox) && !x.c.bloqueadoAhora);
+  const bloq = activas.filter(x=>x.c.bloqueadoAhora);
+  const cobrar = activas.reduce((a,x)=>a+x.c.saldo,0);
+  const q = busqueda.toLowerCase();
+  let lista = all.filter(x=>{
+    if(filtro==='activas' && (x.v.liberado||x.c.completo)) return false;
+    if(filtro==='vencidas' && !venc.includes(x)) return false;
+    if(filtro==='bloqueadas' && !bloq.includes(x)) return false;
+    if(filtro==='pagadas' && !(x.c.completo||x.v.liberado)) return false;
+    if(q && !(`${x.v.cliente} ${x.v.dni} ${x.v.imei} ${x.v.imei2} ${x.v.modelo} ${x.v.telefono}`.toLowerCase().includes(q))) return false;
+    return true;
+  });
+  const chip=(k,t)=>`<button class="chip ${filtro===k?'on':''}" data-f="${k}">${t}</button>`;
+  return `<div class="stats">
+    <div class="stat"><b>${activas.length}</b><span>En cuotas</span></div>
+    <div class="stat"><b style="color:var(--naranja)">${venc.length}</b><span>Vencidas</span></div>
+    <div class="stat"><b style="color:var(--rojo)">${bloq.length}</b><span>Bloqueadas</span></div>
+    <div class="stat"><b style="font-size:16px">${money(cobrar)}</b><span>A cobrar</span></div></div>
+  <input id="q" placeholder="Buscar por cliente, DNI, IMEI, modelo…" value="${esc(busqueda)}">
+  <div class="chips">${chip('todas','Todas')}${chip('activas','En cuotas')}${chip('vencidas','Vencidas')}${chip('bloqueadas','Bloqueadas')}${chip('pagadas','Pagadas')}</div>
+  ${lista.length ? lista.map(x=>tarjeta(x)).join('') : `<div class="card center muted">No hay ventas para mostrar.<br><br><button class="btn" onclick="irA('nueva')">Cargar una venta</button></div>`}
+  <p class="center"><button class="btn sec" id="recargar">↻ Actualizar</button></p>`;
+}
+function tarjeta({id,v,c}){
+  const rep = REPORTES[v.imei] || REPORTES[v.imei2];
+  const pct = c.cuotas ? Math.round(c.pagadas/c.cuotas*100) : 0;
+  return `<div class="card venta" data-id="${id}"><div class="main">
+    <h3>${esc(v.cliente)}</h3>
+    <div class="muted">${esc(v.modelo)} · IMEI ${esc(v.imei)}</div>
+    <div class="muted">Cuotas ${c.pagadas}/${c.cuotas} · Saldo ${money(c.saldo)}${c.prox?` · Próx. ${fmtD(c.prox)}`:''}</div>
+    <div class="muted">${esc(local(v).nombre)} · Celular: ${rep?('visto '+fmtDT(rep.ultimo)+(rep.bloqueado?' 🔒':'')):'<i>sin conexión aún</i>'}</div>
+    <div class="bar"><i style="width:${pct}%"></i></div></div>
+    <span class="tag ${c.cls}">${c.est}</span></div>`;
+}
+function bindVentas(){
+  $('#q').oninput = e=>{ busqueda=e.target.value; const pos=e.target.selectionStart; render(); const q=$('#q'); q.focus(); q.setSelectionRange(pos,pos); };
+  document.querySelectorAll('.chip').forEach(b=>b.onclick=()=>{ filtro=b.dataset.f; render(); });
+  document.querySelectorAll('.venta').forEach(el=>el.onclick=()=>detalle(el.dataset.id));
+  $('#recargar').onclick = ()=>refrescar(true);
+}
+
+function vistaForm(id){
+  const v = id ? VENTAS[id] : {local:0, frecuencia:'mensual', cuotas:6, gracia:CONF.gracia, primerVenc:isoL(sumarPeriodo(new Date(),1,'mensual'))};
+  const opLoc = CONF.locales.map((l,i)=>`<option value="${i}" ${Number(v.local)===i?'selected':''}>${esc(l.nombre)}</option>`).join('');
+  const opF = ['semanal','quincenal','mensual'].map(f=>`<option ${v.frecuencia===f?'selected':''}>${f}</option>`).join('');
+  return `<div class="card"><h2 style="margin-top:0">${id?'Editar venta':'Nueva venta en cuotas'}</h2>
+  <div class="row"><div><label>Cliente (nombre y apellido)</label><input id="f_cliente" value="${esc(v.cliente)}"></div>
+  <div><label>DNI</label><input id="f_dni" inputmode="numeric" value="${esc(v.dni)}"></div></div>
+  <div class="row"><div><label>Teléfono / WhatsApp del cliente</label><input id="f_tel" inputmode="tel" value="${esc(v.telefono)}"></div>
+  <div><label>Local que vendió</label><select id="f_local">${opLoc}</select></div></div>
+  <label style="display:flex;align-items:center;gap:8px;margin-top:10px"><input type="checkbox" id="f_estv" ${v.esTv?'checked':''} style="width:auto"> Es un televisor / tablet sin chip (sin IMEI)</label>
+  <div class="row"><div><label>Marca y modelo</label><input id="f_modelo" value="${esc(v.modelo)}" placeholder="Samsung A15 / Smart TV TCL"></div>
+  <div><label id="f_imei_l">IMEI 1 (marcar *#06#)</label><input id="f_imei" value="${esc(v.imei)}"></div></div>
+  <div class="row" id="f_imei2_row"><div><label>IMEI 2 (si es doble chip)</label><input id="f_imei2" inputmode="numeric" maxlength="15" value="${esc(v.imei2)}"></div>
+  <div><label>Precio total financiado</label><input id="f_precio" inputmode="decimal" value="${esc(v.precio)}"></div></div>
+  <div class="row"><div><label>Anticipo / entrega</label><input id="f_anticipo" inputmode="decimal" value="${esc(v.anticipo??0)}"></div>
+  <div><label>Cantidad de cuotas</label><input id="f_cuotas" inputmode="numeric" value="${esc(v.cuotas)}"></div></div>
+  <div class="row"><div><label>Monto de cada cuota</label><input id="f_mc" inputmode="decimal" value="${esc(v.montoCuota)}"><div class="muted" id="f_sug"></div></div>
+  <div><label>Frecuencia</label><select id="f_freq">${opF}</select></div></div>
+  <div class="row"><div><label>Primer vencimiento</label><input id="f_venc" type="date" value="${esc(v.primerVenc)}"></div>
+  <div><label>Días de gracia antes de bloquear</label><input id="f_gracia" inputmode="numeric" value="${esc(v.gracia??CONF.gracia)}"></div></div>
+  <label>Mensaje en la pantalla de bloqueo (opcional)</label><textarea id="f_msj" placeholder="${esc(CONF.mensaje)}">${esc(v.mensaje)}</textarea>
+  <label>Notas internas</label><textarea id="f_notas">${esc(v.notas)}</textarea>
+  <div id="f_err" class="err"></div>
+  <button class="btn full" id="f_ok">${id?'Guardar cambios':'Guardar venta'}</button>
+  ${id?'<button class="btn sec full" id="f_cancel">Cancelar</button>':''}</div>`;
+}
+function luhnOk(s){ if(!/^\d{15}$/.test(s)) return false; let sum=0; for(let i=0;i<15;i++){ let d=+s[14-i]; if(i%2===1){ d*=2; if(d>9) d-=9; } sum+=d; } return sum%10===0; }
+function bindForm(id){
+  const sug = ()=>{ const p=+$('#f_precio').value||0, a=+$('#f_anticipo').value||0, n=+$('#f_cuotas').value||0;
+    $('#f_sug').textContent = n>0 && p>a ? 'Sugerido: '+money((p-a)/n)+' por cuota' : ''; };
+  ['#f_precio','#f_anticipo','#f_cuotas'].forEach(s=>$(s).oninput=sug); sug();
+  const tvToggle = ()=>{ const tv=$('#f_estv').checked;
+    $('#f_imei_l').textContent = tv ? 'ID del equipo (lo muestra la app en la tele/tablet)' : 'IMEI 1 (marcar *#06#)';
+    $('#f_imei').placeholder = tv ? 'ID-xxxxxxxx' : '';
+    $('#f_imei2_row').style.display = tv ? 'none' : ''; };
+  $('#f_estv').onchange = tvToggle; tvToggle();
+  if(id) $('#f_cancel').onclick=()=>{ cerrar(); };
+  $('#f_ok').onclick = async ()=>{
+    const g = s=>$(s).value.trim();
+    const esTv = $('#f_estv').checked;
+    const v = Object.assign({}, id?VENTAS[id]:{creado:Date.now()}, {
+      cliente:g('#f_cliente'), dni:g('#f_dni'), telefono:g('#f_tel'), local:Number(g('#f_local')),
+      modelo:g('#f_modelo'), esTv:esTv,
+      imei: esTv ? g('#f_imei') : g('#f_imei').replace(/\D/g,''),
+      imei2: esTv ? '' : g('#f_imei2').replace(/\D/g,''),
+      precio:Number(g('#f_precio'))||0, anticipo:Number(g('#f_anticipo'))||0, cuotas:parseInt(g('#f_cuotas'))||0,
+      montoCuota:Number(g('#f_mc'))||0, frecuencia:g('#f_freq'), primerVenc:g('#f_venc'),
+      gracia:parseInt(g('#f_gracia'))||0, mensaje:g('#f_msj'), notas:g('#f_notas')});
+    const err = m=>{ $('#f_err').textContent=m; };
+    if(!v.cliente) return err('Falta el nombre del cliente.');
+    if(esTv){
+      if(v.imei.length < 4) return err('Falta el ID del equipo (lo muestra la app en la tele).');
+      if(/[.#$\[\]\/]/.test(v.imei)) return err('El ID no puede tener . # $ [ ] /');
+    } else {
+      if(!/^\d{15}$/.test(v.imei)) return err('El IMEI 1 tiene que tener 15 números.');
+      if(!luhnOk(v.imei) && !confirm('El IMEI 1 no parece válido (dígito verificador). ¿Guardar igual?')) return;
+      if(v.imei2 && !/^\d{15}$/.test(v.imei2)) return err('El IMEI 2 tiene que tener 15 números (o dejalo vacío).');
+    }
+    if(v.cuotas<1 || v.montoCuota<=0) return err('Completá cantidad y monto de cuotas.');
+    if(!v.primerVenc) return err('Falta la fecha del primer vencimiento.');
+    const dup = Object.entries(VENTAS).find(([k,x])=>k!==id && !x.liberado && (x.imei===v.imei || (v.imei2 && x.imei2===v.imei2)));
+    if(dup) return err('Ese IMEI ya está en otra venta activa ('+dup[1].cliente+').');
+    $('#f_ok').disabled=true;
+    try{
+      let nid = id;
+      if(id){
+        const old = VENTAS[id];
+        await db('ventas/'+id,'PUT',v);
+        for(const im of [old.imei, old.imei2]) if(im && im!==v.imei && im!==v.imei2) await db('estado/'+im,'DELETE');
+      } else { const r = await db('ventas','POST',v); nid = r.name; }
+      VENTAS[nid]=v; await publicarEstado(v);
+      toast('Venta guardada'); if(id) cerrar(); vista='ventas'; render();
+      if(!id) detalle(nid);
+    }catch(e){ err(e.message); $('#f_ok').disabled=false; }
+  };
+}
+
+function detalle(id){
+  const v = VENTAS[id]; if(!v) return;
+  const c = calc(v), l = local(v), rep = REPORTES[v.imei] || REPORTES[v.imei2];
+  const pagos = Object.entries(v.pagos||{}).sort((a,b)=>(a[1].fecha||'').localeCompare(b[1].fecha||''));
+  $('#sheet').innerHTML = `<div style="display:flex;justify-content:space-between;align-items:center"><h2>${esc(v.cliente)}</h2>
+    <button class="btn sec" onclick="cerrar()">✕</button></div>
+  <span class="tag ${c.cls}">${c.est}</span>
+  <div class="kv">
+    <span>Equipo</span><span>${esc(v.modelo)}</span>
+    <span>${v.esTv?'ID equipo':'IMEI'}</span><span>${esc(v.imei)}${v.imei2?' / '+esc(v.imei2):''}</span>
+    <span>DNI · Tel</span><span>${esc(v.dni)||'—'} · ${esc(v.telefono)||'—'}</span>
+    <span>Local</span><span>${esc(l.nombre)}</span>
+    <span>Precio</span><span>${money(v.precio)} (anticipo ${money(v.anticipo)})</span>
+    <span>Cuotas</span><span>${c.pagadas}/${c.cuotas} de ${money(v.montoCuota)} · ${esc(v.frecuencia)}</span>
+    <span>Pagado</span><span>${money(c.pagos)} · Saldo ${money(c.saldo)}</span>
+    <span>Próx. venc.</span><span>${c.prox?fmtD(c.prox):'—'}</span>
+    <span>Se bloquea</span><span>${v.liberado?'Nunca (liberado)':c.vence?fmtDT(c.vence):'—'}${v.prorroga?' (prórroga)':''}</span>
+    <span>Celular</span><span>${rep?`Visto ${fmtDT(rep.ultimo)} · ${esc(rep.modelo||'')} · ${rep.bloqueado?'🔒 bloqueado':'🔓 habilitado'}${rep.admin===false?' · ⚠ sin protección':''}`:'Todavía no se conectó'}</span>
+  </div>
+  ${v.notas?`<div class="aviso">${esc(v.notas)}</div>`:''}
+  ${v.liberado?'':`<div class="card" style="margin-top:12px;background:#FAFAFA"><b>Registrar pago</b>
+    <div class="row"><div><label>Monto</label><input id="p_monto" inputmode="decimal" value="${Math.min(v.montoCuota, c.saldo)||''}"></div>
+    <div><label>Fecha</label><input id="p_fecha" type="date" value="${hoyStr()}"></div></div>
+    <button class="btn verde full" id="p_ok">Registrar pago</button></div>`}
+  ${pagos.length?`<b>Pagos</b><table><tr><th>Fecha</th><th>Monto</th><th></th></tr>
+    ${pagos.map(([pid,p])=>`<tr><td>${esc(p.fecha)}</td><td>${money(p.monto)}</td><td style="text-align:right"><a href="#" data-del="${pid}">borrar</a></td></tr>`).join('')}</table>`:''}
+  <div class="btns">
+    ${v.liberado?'':(c.bloqueadoAhora
+      ?`<button class="btn azul" id="a_desb">🔓 Desbloquear</button>`
+      :`<button class="btn" id="a_bloq">🔒 Bloquear ahora</button>`)}
+    ${v.telefono?`<a class="btn verde" target="_blank" rel="noopener" href="${waLink(v,c)}">WhatsApp recordatorio</a>`:''}
+    ${v.liberado?'':`<button class="btn gris" id="a_lib">Liberar equipo</button>`}
+    <button class="btn sec" id="a_edit">Editar</button>
+    <button class="btn sec" id="a_del" style="color:var(--rojo)">Eliminar</button>
+  </div>
+  <div id="d_desb" class="hidden card" style="margin-top:10px;background:#FAFAFA">
+    <b>Desbloquear</b><p class="muted">Si la cuota sigue vencida, elegí hasta qué día le das plazo. Pasada esa fecha se vuelve a bloquear solo.</p>
+    <label>Plazo hasta</label><input id="d_fecha" type="date" value="${isoL(new Date(Date.now()+3*DIA))}">
+    <button class="btn azul full" id="d_ok">Confirmar desbloqueo</button></div>
+  <p class="muted" style="margin-top:12px">El celular revisa cada 15 minutos. Si está en la pantalla de bloqueo, revisa cada 30 segundos (o al tocar "Ya pagué").</p>`;
+  $('#modal').classList.add('on');
+
+  const guardar = async (cambios, msj)=>{
+    const nv = Object.assign({}, VENTAS[id], cambios);
+    for(const k of Object.keys(nv)) if(nv[k]===null) delete nv[k];
+    await db('ventas/'+id,'PUT',nv); VENTAS[id]=nv; await publicarEstado(nv);
+    toast(msj); render(); detalle(id);
+  };
+  const tryG = (f)=>async()=>{ try{ await f(); }catch(e){ toast('Error: '+e.message); } };
+  if($('#p_ok')) $('#p_ok').onclick = tryG(async()=>{
+    const monto = Number($('#p_monto').value); if(!(monto>0)) return toast('Poné un monto');
+    const pid = 'p'+Date.now();
+    const p = Object.assign({}, v.pagos||{}, {[pid]:{monto, fecha:$('#p_fecha').value||hoyStr(), reg:Date.now()}});
+    const nv = {pagos:p, prorroga:null};
+    // Si con este pago queda al día, se saca el bloqueo manual
+    const prueba = calc(Object.assign({}, v, {pagos:p, bloqueado:false, prorroga:null}));
+    if(!prueba.bloqueadoAhora) nv.bloqueado = false;
+    await guardar(nv, prueba.completo ? 'Pago registrado. ¡Terminó de pagar! Podés liberar el equipo.' : 'Pago registrado');
+  });
+  document.querySelectorAll('[data-del]').forEach(a=>a.onclick=tryG(async()=>{
+    if(!confirm('¿Borrar este pago?')) return;
+    const p = Object.assign({}, v.pagos); delete p[a.dataset.del];
+    await guardar({pagos:p}, 'Pago borrado');
+  }));
+  if($('#a_bloq')) $('#a_bloq').onclick = tryG(async()=>{
+    if(!confirm('¿Bloquear el equipo de '+v.cliente+' ahora?')) return;
+    await guardar({bloqueado:true}, 'Orden de bloqueo enviada');
+  });
+  if($('#a_desb')) $('#a_desb').onclick = ()=>{
+    const venc = Date.now() > c.vence && !c.completo;
+    if(!venc) return tryG(()=>guardar({bloqueado:false}, 'Orden de desbloqueo enviada'))();
+    $('#d_desb').classList.remove('hidden');
+  };
+  if($('#d_ok')) $('#d_ok').onclick = tryG(async()=>{
+    const f = $('#d_fecha').value; if(!f) return toast('Elegí una fecha');
+    await guardar({bloqueado:false, prorroga:f}, 'Desbloqueado hasta el '+fmtD(parseD(f)));
+  });
+  if($('#a_lib')) $('#a_lib').onclick = tryG(async()=>{
+    const msg = c.completo ? '¿Liberar el equipo? Se quita la protección para siempre.'
+      : 'OJO: todavía debe '+money(c.saldo)+'. Si lo liberás se quita la protección para siempre y no se puede volver a bloquear. ¿Seguro?';
+    if(!confirm(msg)) return;
+    await guardar({liberado:true, bloqueado:false, fechaLiberado:Date.now()}, 'Equipo liberado');
+  });
+  $('#a_edit').onclick = ()=>{ $('#sheet').innerHTML = vistaForm(id); bindForm(id); };
+  $('#a_del').onclick = tryG(async()=>{
+    if(!confirm('¿Eliminar la venta de '+v.cliente+'? Si el celular sigue con la protección, va a quedar habilitado.')) return;
+    await db('ventas/'+id,'DELETE');
+    for(const im of [v.imei, v.imei2]) if(im) await db('estado/'+im,'DELETE');
+    delete VENTAS[id]; cerrar(); render(); toast('Venta eliminada');
+  });
+}
+function waLink(v,c){
+  let n = String(v.telefono).replace(/\D/g,'');
+  if(n.startsWith('0')) n=n.slice(1);
+  if(!n.startsWith('54')) n='549'+n;
+  const l = local(v);
+  const txt = c.completo ? `Hola ${v.cliente}! Terminaste de pagar tu ${v.modelo}. ¡Gracias! ${l.nombre}`
+    : (Date.now()>finDia(c.prox)
+      ? `Hola ${v.cliente}, la cuota ${c.pagadas+1}/${c.cuotas} de tu ${v.modelo} (${money(v.montoCuota)}) venció el ${fmtD(c.prox)}. Para evitar el bloqueo del equipo, regularizala antes del ${fmtD(c.vence)}. ${l.nombre}${l.tel?' – '+l.tel:''}`
+      : `Hola ${v.cliente}, te recordamos que la cuota ${c.pagadas+1}/${c.cuotas} de tu ${v.modelo} (${money(v.montoCuota)}) vence el ${fmtD(c.prox)}. ${l.nombre}${l.tel?' – '+l.tel:''}`);
+  return 'https://wa.me/'+n+'?text='+encodeURIComponent(txt);
+}
+function cerrar(){ $('#modal').classList.remove('on'); }
+$('#modal').onclick = e=>{ if(e.target.id==='modal') cerrar(); };
+function irA(v){ vista=v; render(); window.scrollTo(0,0); }
+document.querySelectorAll('#nav button').forEach(b=>b.onclick=()=>irA(b.dataset.v));
+
+function apkUrl(){ return new URL(APK_NAME, location.href).href; }
+function vistaInstalar(){
+  const opLoc = CONF.locales.map((l,i)=>`<option value="${i}">${esc(l.nombre)}</option>`).join('');
+  return `<div class="card"><h2 style="margin-top:0">Instalar la protección en un equipo</h2>
+  <ol>
+    <li>El celular tiene que estar <b>recién reseteado</b> (de fábrica), en la pantalla de bienvenida.</li>
+    <li>Tocá <b>6 veces seguidas</b> en un lugar vacío de la pantalla de bienvenida. Se abre el lector de QR (en algunos equipos pide conectarse a Wi-Fi primero).</li>
+    <li>Escaneá este código. El celular descarga la app y queda protegido.</li>
+    <li>Terminá la configuración normal con la cuenta de Google del cliente.</li>
+    <li>Abrí la app <b>Dragon Protección</b> en el equipo y fijate que diga "Protección activa: Sí" y el IMEI.</li>
+  </ol>
+  <label>Local (nombre y teléfono que se ven al bloquear)</label><select id="i_local">${opLoc}</select>
+  <div class="row"><div><label>Wi-Fi para la instalación (opcional)</label><input id="i_ssid" placeholder="Nombre de la red"></div>
+  <div><label>Contraseña del Wi-Fi</label><input id="i_pass"></div></div>
+  <button class="btn full" id="i_gen">Generar código QR</button>
+  <div id="qr" class="hidden" style="margin-top:12px"></div>
+  <div class="aviso">Celulares y tablets: Android 8 o más nuevo. En iPhone no se puede. El QR sirve para todos los equipos: el IMEI lo lee la app sola.</div>
+  <div class="aviso"><b>Televisores Android TV / Google TV:</b> no se instala con QR (la tele no es táctil). Se instala con una PC por cable USB usando ADB, o con el método de cada marca. Al terminar, abrí la app <b>Dragon Protección</b> en la tele, copiá el "ID del equipo" que muestra y cargalo en una venta marcando la casilla "Es un televisor". En televisores Samsung (Tizen) y LG (webOS) no funciona.</div>
+  <p class="muted">APK: <a href="${esc(apkUrl())}">${esc(APK_NAME)}</a></p></div>`;
+}
+function bindInstalar(){
+  $('#i_gen').onclick = ()=>{
+    const l = CONF.locales[Number($('#i_local').value)||0];
+    const data = {
+      'android.app.extra.PROVISIONING_DEVICE_ADMIN_COMPONENT_NAME': APP_COMPONENT,
+      'android.app.extra.PROVISIONING_DEVICE_ADMIN_PACKAGE_DOWNLOAD_LOCATION': apkUrl(),
+      'android.app.extra.PROVISIONING_DEVICE_ADMIN_SIGNATURE_CHECKSUM': APP_CHECKSUM,
+      'android.app.extra.PROVISIONING_LEAVE_ALL_SYSTEM_APPS_ENABLED': true,
+      'android.app.extra.PROVISIONING_SKIP_ENCRYPTION': true,
+      'android.app.extra.PROVISIONING_ADMIN_EXTRAS_BUNDLE': {server: CFG.dbUrl, nombre: l.nombre, tel: l.tel || '', frp: CONF.frp || ''}
+    };
+    const ssid = $('#i_ssid').value.trim();
+    if(ssid){
+      data['android.app.extra.PROVISIONING_WIFI_SSID'] = ssid;
+      const pw = $('#i_pass').value;
+      if(pw){ data['android.app.extra.PROVISIONING_WIFI_PASSWORD'] = pw; data['android.app.extra.PROVISIONING_WIFI_SECURITY_TYPE'] = 'WPA'; }
+      else data['android.app.extra.PROVISIONING_WIFI_SECURITY_TYPE'] = 'NONE';
+    }
+    const box = $('#qr'); box.innerHTML=''; box.classList.remove('hidden');
+    if(typeof QRCode === 'undefined'){ box.innerHTML='<div class="err">No cargó el generador de QR. Revisá la conexión a internet.</div>'; return; }
+    new QRCode(box, {text: JSON.stringify(data), width: 320, height: 320, correctLevel: QRCode.CorrectLevel.M});
+  };
+}
+
+function vistaAjustes(){
+  return `<div class="card"><h2 style="margin-top:0">Locales</h2>
+  ${CONF.locales.map((l,i)=>`<div class="row"><div><label>Nombre local ${i+1}</label><input id="c_n${i}" value="${esc(l.nombre)}"></div>
+    <div><label>Teléfono</label><input id="c_t${i}" value="${esc(l.tel)}"></div></div>`).join('')}
+  <h2>Bloqueo</h2>
+  <label>Mensaje por defecto en la pantalla de bloqueo</label><textarea id="c_msj">${esc(CONF.mensaje)}</textarea>
+  <div class="row"><div><label>Días de gracia por defecto</label><input id="c_gracia" inputmode="numeric" value="${esc(CONF.gracia)}"></div>
+  <div><label>Bloquear si no se conecta en X días (0 = no)</label><input id="c_dias" inputmode="numeric" value="${esc(CONF.diasSinConexion)}"></div></div>
+  <p class="muted">"Bloquear si no se conecta" evita que el cliente deje el celular sin internet para esquivar el bloqueo. Con 0 queda desactivado.</p>
+  <h2>Protección anti-recovery (FRP)</h2>
+  <label>Cuenta de Google "llave maestra"</label><input id="c_frp" type="email" value="${esc(CONF.frp)}">
+  <p class="muted">Si el cliente resetea el celular por recovery (botones), el equipo pide esta cuenta para poder usarse. Dejalo vacío para desactivar. Al liberar un equipo se quita solo.</p>
+  <button class="btn full" id="c_ok">Guardar ajustes</button>
+  <button class="btn sec full" id="c_pub">Volver a enviar el estado a todos los equipos</button></div>
+  <div class="card"><h2 style="margin-top:0">Reglas de seguridad de Firebase</h2>
+  <p class="muted">Pegalas en Firebase → Realtime Database → Reglas.</p><pre>${esc(RULES)}</pre>
+  <button class="btn sec" id="c_copy">Copiar reglas</button></div>
+  <div class="card"><button class="btn sec full" id="c_out">Cerrar sesión</button>
+  <button class="btn sec full" id="c_reset">Cambiar datos de Firebase</button></div>`;
+}
+function bindAjustes(){
+  $('#c_ok').onclick = async ()=>{
+    const n = Object.assign({}, CONF, {
+      locales: CONF.locales.map((l,i)=>({nombre:$('#c_n'+i).value.trim()||l.nombre, tel:$('#c_t'+i).value.trim()})),
+      mensaje: $('#c_msj').value.trim() || DEF_CONFIG.mensaje,
+      gracia: parseInt($('#c_gracia').value)||0,
+      diasSinConexion: parseInt($('#c_dias').value)||0,
+      frp: $('#c_frp').value.trim() });
+    try{ await db('config','PUT',n); CONF=n; await republicar(); toast('Ajustes guardados'); }catch(e){ toast('Error: '+e.message); }
+  };
+  $('#c_pub').onclick = async ()=>{ try{ await republicar(); toast('Estado enviado a todos'); }catch(e){ toast('Error: '+e.message); } };
+  $('#c_copy').onclick = async ()=>{ try{ await navigator.clipboard.writeText(RULES); toast('Copiadas'); }catch(e){ toast('No se pudo copiar'); } };
+  $('#c_out').onclick = logout;
+  $('#c_reset').onclick = ()=>{ if(confirm('¿Borrar la configuración de Firebase de este dispositivo?')){ CFG=null; AUTH=null; save('dbl_cfg',null); save('dbl_auth',null); render(); } };
+}
+async function republicar(){ for(const v of Object.values(VENTAS)) if(!v.liberado) await publicarEstado(v); }
+
+async function refrescar(aviso){
+  try{ await cargar(); render(); if(aviso) toast('Actualizado'); }
+  catch(e){ if(e.message==='login') render(); else { render(); toast('Error: '+e.message); } }
+}
+
+// Revisión automática: cada 5 minutos recalcula y publica los vencimientos
+setInterval(()=>{ if(CFG && AUTH && !$('#modal').classList.contains('on') && document.activeElement?.tagName!=='INPUT' && document.activeElement?.tagName!=='TEXTAREA') refrescar(); }, 300000);
+
+render();
+if(CFG && AUTH) refrescar();
+</script>
+</body>
+</html>

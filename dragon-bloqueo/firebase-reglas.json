@@ -1,0 +1,15 @@
+{
+  "rules": {
+    "estado": {
+      ".read": "auth != null",
+      ".write": "auth != null",
+      "$imei": { ".read": true }
+    },
+    "reportes": {
+      ".read": "auth != null",
+      "$imei": { ".write": true }
+    },
+    "ventas": { ".read": "auth != null", ".write": "auth != null" },
+    "config": { ".read": "auth != null", ".write": "auth != null" }
+  }
+}
