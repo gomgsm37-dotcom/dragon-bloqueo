@@ -77,29 +77,33 @@ public class MainActivity extends Activity {
         root.addView(check);
 
         // Solo se puede cargar el servidor a mano si todavía no tiene uno (instalación por cable).
-        if (Config.server(this).length() == 0) {
-            TextView l = new TextView(this);
-            l.setText("\nDirección del panel (Firebase):");
-            root.addView(l);
-            final EditText et = new EditText(this);
-            et.setHint("https://xxxx-default-rtdb.firebaseio.com");
-            et.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_URI);
-            root.addView(et);
-            Button save = new Button(this);
-            save.setText("Guardar");
-            save.setAllCaps(false);
-            save.setOnClickListener(v -> {
-                String s = et.getText().toString().trim();
-                if (s.startsWith("https://")) {
-                    Config.setServer(this, s);
-                    Policy.setup(this);
-                    recreate();
-                } else {
-                    et.setError("Tiene que empezar con https://");
-                }
-            });
-            root.addView(save);
-        }
+        TextView l = new TextView(this);
+        l.setText("\nDirección del panel (Firebase):");
+        root.addView(l);
+        final EditText et = new EditText(this);
+        et.setHint("https://xxxx-default-rtdb.firebaseio.com");
+        et.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_URI);
+        et.setText(Config.server(this));
+        root.addView(et);
+        Button save = new Button(this);
+        save.setText("Guardar dirección");
+        save.setAllCaps(false);
+        save.setOnClickListener(v -> {
+            String s = et.getText().toString().trim();
+            if (s.startsWith("https://") && s.contains(".firebase")) {
+                Config.setServer(this, s);
+                Policy.setup(this);
+                final Context c = getApplicationContext();
+                new Thread(() -> {
+                    try { Sync.run(c); } catch (Throwable ignored) {}
+                    handler.post(this::refresh);
+                }).start();
+                recreate();
+            } else {
+                et.setError("Revisá: tiene que ser https://...-default-rtdb.firebaseio.com");
+            }
+        });
+        root.addView(save);
 
         refresh();
         return sv;
